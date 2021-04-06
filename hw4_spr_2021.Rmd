@@ -1,10 +1,17 @@
 ---
 title: " Modern Data Mining, HW 4"
 author:
+<<<<<<< HEAD
 - Group Member Madeleine Bannon
 - Group Member Chris Coelho
 - Group Member Charles Lachapelle
 date: '11:59 pm, April 11, 2021'
+=======
+- Chris Coelho
+- Group Member 2
+- Group Member 3
+date: '11:59 pm, April 4, 2021'
+>>>>>>> 28460bc38041aba206bbfb9ff129824661f12e5e
 output:
   pdf_document:
     number_sections: yes
