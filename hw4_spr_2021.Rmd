@@ -1,17 +1,11 @@
 ---
 title: " Modern Data Mining, HW 4"
 author:
-<<<<<<< HEAD
 - Group Member Madeleine Bannon
 - Group Member Chris Coelho
 - Group Member Charles Lachapelle
 date: '11:59 pm, April 11, 2021'
-
 output:
-  pdf_document:
-    number_sections: yes
-    toc: yes
-    toc_depth: '4'
   html_document:
     code_folding: show
     highlight: haddock
@@ -20,6 +14,10 @@ output:
     toc: yes
     toc_depth: 4
     toc_float: yes
+  pdf_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: '4'
   word_document:
     toc: yes
     toc_depth: '4'
@@ -139,7 +137,7 @@ Conceptual questions to understand the building blocks of logistic regression. A
 
 i. Take a random subsample of size 5 from `hd_data_f` which only includes `HD` and `SBP`. Also set   `set.seed(50)`. List the five observations neatly below. No code should be shown here.
 
-```{r, include=F}
+```{r, results=T}
 set.seed(50)
 hd_data.f_sample <- sample_n(hd_data.f, 5) %>%
   select(HD = HD, 
@@ -158,7 +156,7 @@ iii. Find the MLE based on this subset using glm(). Report the estimated logit f
 
 The logit function estimated by using glm() is = -2.55 + 0.01*SBP. [NEED TO FINISH ANSWERING]
 
-```{r, include=F}
+```{r, results=T}
 
 fit0 <- glm(HD ~ SBP, hd_data.f_sample, family=binomial(logit))
 summary(fit0, results=TRUE)
@@ -167,9 +165,11 @@ summary(fit0, results=TRUE)
 
 iv. Evaluate the probability of Liz having heart disease. 
 
-```{r, include=F}
+The probability of Liz having heart disease according to this particular model is 24.2%. 
 
-fit0.predict <- predict(fit1, hd_data.new, type="response")
+```{r, results=T}
+
+fit0.predict <- predict(fit0, hd_data.new, type="response")
 fit0.predict
 
 ```
@@ -201,6 +201,7 @@ summary(fit1.6)
 i. Which single variable would be the most important to add?  Add it to your model, and call the new fit `fit2`.  
 
 We will pick up the variable either with highest $|z|$ value, or smallest $p$ value. Report the summary of your `fit2` Note: One way to keep your output neat, we will suggest you using `xtable`. And here is the summary report looks like.
+
 ```{r the most important addition, results='asis', comment="   "}
 
 library(xtable)
@@ -209,13 +210,35 @@ fit2 <- glm(HD~SBP + SEX, hd_data.f, family=binomial)
 xtable(fit2)
 ```
 
+```{r, results=T}
+
+summary(fit2)
+
+```
+
 ii. Is the residual deviance of `fit2` always smaller than that of `fit1`? Why or why not?
 
-
+[NEED TO COMPLETE]
   
 iii. Perform both the Wald test and the Likelihood ratio tests (Chi-Squared) to see if the added variable is significant at the .01 level.  What are the p-values from each test? Are they the same? 
 
+Wald Test
+```{r, results=T}
 
+Anova(fit2)
+
+```
+
+Chi-squared Test
+```{r, results=T}
+
+chi.sq <- 1469-1374
+pvalue <- pchisq(chi.sq, 2, lower.tail=FALSE)
+pvalue
+
+```
+
+For the Wald test, the p-value of SEX is significant at the .01 level with a p-value of 3.8e-11. For the Chi-squared test, the p-value is significant at the .01 level with a p-value of 2.35e-21. No, they are not the same value. The p-value of the chi-squared test is much smaller than the p-value from the Wald test. 
 
 ###  Model building
 
@@ -223,11 +246,77 @@ Start with all variables. Our goal is to fit a well-fitting model, that is still
 
 i. Use backward selection method. Only keep variables whose coefficients are significantly different from 0 at .05 level. Kick out the variable with the largest p-value first, and then re-fit the model to see if there are other variables you want to kick out.
 
-ii. Use AIC as the criterion for model selection. Find a model with small AIC through exhaustive search. Does exhaustive search  guarantee that the p-values for all the remaining variables are less than .05? Is our final model here the same as the model from backwards elimination? 
+Backward selection method
+
+```{r, include=T, results='hide'}
+
+fit3.1 <- glm(HD~SBP + AGE + SEX + DBP + CHOL + FRW + CIG, hd_data.f, family=binomial)
+summary(fit3.1)
+# AIC: 1359
+
+fit3.2 <- glm(HD~SBP + AGE + SEX + CHOL + FRW + CIG, hd_data.f, family=binomial)
+summary(fit3.2)
+# AIC: 1357
+
+fit3.3 <- glm(HD~SBP + AGE + SEX + CHOL + CIG, hd_data.f, family=binomial)
+summary(fit3.3)
+# AIC: 1358
+
+fit3.4 <- glm(HD~SBP + AGE + SEX + CHOL, hd_data.f, family=binomial)
+summary(fit3.4)
+# AIC: 1359
+
+```
+
+Model fit3.4 results in a model where all indepdent variables are significant at a .05 level. The AIC for this model is 1359. 
+
+```{r, results=T}
+
+fit3.4 <- glm(HD~SBP + AGE + SEX + CHOL, hd_data.f, family=binomial)
+summary(fit3.4)
+# AIC: 1359
+
+```
+
+ii. Use AIC as the criterion for model selection. Find a model with small AIC through exhaustive search. Does exhaustive search guarantee that the p-values for all the remaining variables are less than .05? Is our final model here the same as the model from backwards elimination? 
+
+Exhaustive search
+
+No, exhaustive search does not guarantee that the p-values for all the remaining variables are less than .05. No, the final model here is not the same as the model from backwards elimination. The final model using Backwards search does not include the indepedent variables: CIG and FRW.
+
+```{r, include=T, results='hide'}
+
+Xy_design <- model.matrix(HD ~.+0, hd_data.f) 
+Xy <- data.frame(Xy_design, hd_data.f$HD)   
+
+fit.exhaustive <- bestglm(Xy, family = binomial, method = "exhaustive", IC="AIC", nvmax = 10) 
+
+```
+
+```{r, results=T}
+fit.exhaustive$BestModel
+```
+
+```{r, results=T}
+fit.exhaustive.final <- glm(HD~AGE+SEX+SBP+CHOL+FRW+CIG, family=binomial, data=hd_data.f)
+summary(fit.exhaustive.final)
+```
 
 iii. Use the model chosen from part ii. as the final model. Write a brief summary to describe important factors relating to Heart Diseases (i.e. the relationships between those variables in the model and heart disease). Give a definition of “important factors”. 
 
+[NEED TO COMPLETE]
+
 iv. What is the probability that Liz will have heart disease, according to our final model?
+
+The probability of Liz having heart disease according to this particular model is 3.5%. 
+
+```{r, results=T}
+
+fit.exhaustive.predict <- predict(fit.exhaustive.final, hd_data.new, type="response")
+fit.exhaustive.predict
+
+```
+
 
 ##  Classification analysis
 
