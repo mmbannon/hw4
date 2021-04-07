@@ -6,12 +6,7 @@ author:
 - Group Member Chris Coelho
 - Group Member Charles Lachapelle
 date: '11:59 pm, April 11, 2021'
-=======
-- Chris Coelho
-- Group Member 2
-- Group Member 3
-date: '11:59 pm, April 4, 2021'
->>>>>>> 28460bc38041aba206bbfb9ff129824661f12e5e
+
 output:
   pdf_document:
     number_sections: yes
@@ -36,7 +31,7 @@ urlcolor: blue
 knitr::opts_chunk$set(echo = FALSE, results = "hide", fig.width=8, fig.height=4)
 options(scipen = 0, digits = 3)  # controls base R output
 if(!require('pacman')) {install.packages('pacman')}
-pacman::p_load(bestglm, glmnet, leaps, car, tidyverse, pROC, caret) # add the packages needed
+pacman::p_load(bestglm, glmnet, leaps, car, tidyverse, pROC, caret, dplyr) # add the packages needed
 ```
 
 \pagebreak
@@ -99,7 +94,6 @@ Review the code and concepts covered in
 We have two parts in this homework. Part I is guided portion of work, designed to get familiar with elements of logistic regressions/classification. Part II, we bring you projects. You have options to choose one topic among either Credit Risk via LendingClub or Diabetes and Health Management. Find details in the projects. 
 
 
-
 # Part I: Framingham heart disease study 
 
 We will continue to use the Framingham Data (`Framingham.dat`) so that you are already familiar with the data and the variables. All the results are obtained through training data. 
@@ -111,7 +105,7 @@ To keep our answers consistent, use a subset of the data, and exclude anyone wit
 ```{r data preparation, include=F}
 # Notice that we hide the code and the results here
 # Using `include=F` in the chunk declaration. 
-hd_data <- read.csv("Framingham.dat")
+hd_data <- read.csv("data/Framingham.dat")
 str(hd_data) 
 
 ### Renames, setting the variables with correct natures...
@@ -145,40 +139,83 @@ Conceptual questions to understand the building blocks of logistic regression. A
 
 i. Take a random subsample of size 5 from `hd_data_f` which only includes `HD` and `SBP`. Also set   `set.seed(50)`. List the five observations neatly below. No code should be shown here.
 
+```{r, include=F}
+set.seed(50)
+hd_data.f_sample <- sample_n(hd_data.f, 5) %>%
+  select(HD = HD, 
+         SBP = SBP)
+
+print(hd_data.f_sample)
+
+```
+
 ii. Write down the likelihood function using the five observations above.
+
+L(B0,B1|Data) = P(HD=1|SBP=152) * P(HD=0|SBP=110) * P(HD=0|SBP=154) * P(HD=1|SBP=160) * P(HD=0|SBP=182)
+              = (exp(B0+152 * B1)/exp(B0+152 * B1)) * ... * 1/exp(B0+182 * B1))
 
 iii. Find the MLE based on this subset using glm(). Report the estimated logit function of `SBP` and the probability of `HD`=1. Briefly explain how the MLE are obtained based on ii. above.
 
+The logit function estimated by using glm() is = -2.55 + 0.01*SBP. [NEED TO FINISH ANSWERING]
+
+```{r, include=F}
+
+fit0 <- glm(HD ~ SBP, hd_data.f_sample, family=binomial(logit))
+summary(fit0, results=TRUE)
+
+```
+
 iv. Evaluate the probability of Liz having heart disease. 
+
+```{r, include=F}
+
+fit0.predict <- predict(fit1, hd_data.new, type="response")
+fit0.predict
+
+```
+
 
 ### Identify important risk factors for `Heart.Disease.`
 
 We focus on understanding the elements of basic inference method in this part. Let us start a fit with just one factor, `SBP`, and call it `fit1`. We then add one variable to this at a time from among the rest of the variables. For example
 ```{r, results='hide'}
+head(hd_data.f, 5)
+
 fit1 <- glm(HD~SBP, hd_data.f, family=binomial)
 summary(fit1)
 fit1.1 <- glm(HD~SBP + AGE, hd_data.f, family=binomial)
 summary(fit1.1)
-# you will need to finish by adding each other variable 
-# fit1.2...
+fit1.2 <- glm(HD~SBP + AGE + SEX, hd_data.f, family=binomial)
+summary(fit1.2)
+fit1.3 <- glm(HD~SBP + AGE + SEX + DBP, hd_data.f, family=binomial)
+summary(fit1.3)
+fit1.4 <- glm(HD~SBP + AGE + SEX + DBP + CHOL, hd_data.f, family=binomial)
+summary(fit1.4)
+fit1.5 <- glm(HD~SBP + AGE + SEX + DBP + CHOL + FRW, hd_data.f, family=binomial)
+summary(fit1.5)
+fit1.6 <- glm(HD~SBP + AGE + SEX + DBP + CHOL + FRW + CIG, hd_data.f, family=binomial)
+summary(fit1.6)
+
 ```
 
 i. Which single variable would be the most important to add?  Add it to your model, and call the new fit `fit2`.  
 
 We will pick up the variable either with highest $|z|$ value, or smallest $p$ value. Report the summary of your `fit2` Note: One way to keep your output neat, we will suggest you using `xtable`. And here is the summary report looks like.
 ```{r the most important addition, results='asis', comment="   "}
-## How to control the summary(fit2) output to cut some junk?
-## We could use packages: xtable or broom. 
-## Assume the fit2 is obtained by SBP + AGE
+
 library(xtable)
 options(xtable.comment = FALSE)
-fit2 <- glm(HD~SBP + AGE, hd_data.f, family=binomial)
+fit2 <- glm(HD~SBP + SEX, hd_data.f, family=binomial)
 xtable(fit2)
 ```
 
 ii. Is the residual deviance of `fit2` always smaller than that of `fit1`? Why or why not?
+
+
   
 iii. Perform both the Wald test and the Likelihood ratio tests (Chi-Squared) to see if the added variable is significant at the .01 level.  What are the p-values from each test? Are they the same? 
+
+
 
 ###  Model building
 
