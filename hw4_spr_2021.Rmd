@@ -232,9 +232,7 @@ Anova(fit2)
 Chi-squared Test
 ```{r, results=T}
 
-chi.sq <- 1469-1374
-pvalue <- pchisq(chi.sq, 2, lower.tail=FALSE)
-pvalue
+anova(fit1, fit2, test="Chisq")
 
 ```
 
@@ -298,8 +296,8 @@ fit.exhaustive$BestModel
 ```
 
 ```{r, results=T}
-fit.exhaustive.final <- glm(HD~AGE+SEX+SBP+CHOL+FRW+CIG, family=binomial, data=hd_data.f)
-summary(fit.exhaustive.final)
+fit.final <- glm(HD~AGE+SEX+SBP+CHOL+FRW+CIG, family=binomial, data=hd_data.f)
+summary(fit.final)
 ```
 
 iii. Use the model chosen from part ii. as the final model. Write a brief summary to describe important factors relating to Heart Diseases (i.e. the relationships between those variables in the model and heart disease). Give a definition of “important factors”. 
@@ -312,8 +310,8 @@ The probability of Liz having heart disease according to this particular model i
 
 ```{r, results=T}
 
-fit.exhaustive.predict <- predict(fit.exhaustive.final, hd_data.new, type="response")
-fit.exhaustive.predict
+fit.final.pred <- predict(fit.final, hd_data.new, type="response")
+fit.final.pred
 
 ```
 
@@ -324,11 +322,94 @@ fit.exhaustive.predict
 
 i. Display the ROC curve using `fit1`. Explain what ROC reports and how to use the graph. Specify the classifier such that the False Positive rate is less than .1 and the True Positive rate is as high as possible.
 
+ROC reports the tradeoff between sensitivity and specifity of a given classifier -- i.e., it is an evaluation metric for assessing the performance of a classification model. The classifer in this case has a FPR of 9.76% and a TPR of 21.5% with a threshold of 29.8%. 
+
+```{r}
+
+fit1.roc <- roc(hd_data.f$HD, fit1$fitted)
+plot(1-fit1.roc$specificities, 
+     fit1.roc$sensitivities, col="red", lwd=3, type="l",
+     xlab="False Positive", 
+     ylab="Sensitivity")
+legend("bottomright",
+       c(paste0("fit1 AUC=", round(fit1.roc$auc,2))),
+       col=c("red"),
+       lty=1)
+
+```
+
+
+
+```{r}
+
+roc.df.fit1 <- data.frame(
+  tpp=fit1.roc$sensitivities*100, ## tpp = true positive percentage
+  fpp=(1 - fit1.roc$specificities)*100, ## fpp = false positive precentage
+  thresholds=fit1.roc$thresholds)
+
+tail(roc.df.fit1, 5)
+
+roc.df.fit1 %>%
+  filter(fpp<10) %>%
+  slice(1)
+      
+```
+
+
 ii. Overlay two ROC curves: one from `fit1`, the other from `fit2`. Does one curve always contain the other curve? Is the AUC of one curve always larger than the AUC of the other one? Why or why not?
 
-iii.  Estimate the Positive Prediction Values and Negative Prediction Values for `fit1` and `fit2` using .5 as a threshold. Which model is more desirable if we prioritize the Positive Prediction values?
+@chris @charles please check this: On an AUC basis, fit2 has a larger AUC than fit2. However, at certain thresholds, the ROC curve for fit2 appears to be below fit1. No, one curve does not always contain the other curve, and the ACU of one curve is not always larger than the AUC of the other one. This is because adding additional variables does not necessarily increase predictive power, particularly at specific thresholds. 
+
+```{r}
+fit2.roc <- roc(hd_data.f$HD, fit2$fitted)
+
+plot(1-fit1.roc$specificities, 
+     fit1.roc$sensitivities, col="red", lwd=3, type="l",
+     xlab="False Positive", 
+     ylab="Sensitivity")
+lines(1-fit2.roc$specificities, fit2.roc$sensitivities, col="blue", lwd=3)
+legend("bottomright",
+       c(paste0("fit1 AUC=", round(fit1.roc$auc,2)), 
+         paste0("fit2 AUC=", round(fit2.roc$auc, 2))),
+       col=c("red", "blue"),
+       lty=1)
+```
+
+iii.  Estimate the Positive Prediction Values and Negative Prediction Values for `fit1` and `fit2` using .5 as a threshold. Which model is more desirable if we prioritize the Positive Prediction values? @chris @charles 
+
+fit2 is more desireable if we prioritze the Positive Prediction values. fit2 has a Positive Prediction value of .5 whereas fit1 has a Positive Prediction value of .45
+
+
+```{r}
+
+fit1.pred.5 <- ifelse(fit1$fitted > .5, "1", "0")
+
+confusionMatrix(data = as.factor(fit1.pred.5),        
+                       reference = hd_data.f$HD,            
+                       positive = levels(hd_data.f$HD)[2])
+
+```
+
+
+```{r}
+
+fit2.pred.5 <- ifelse(fit2$fitted > .5, "1", "0")
+
+confusionMatrix(data = as.factor(fit2.pred.5),        
+                       reference = hd_data.f$HD,            
+                       positive = levels(hd_data.f$HD)[2])
+
+```
 
 iv.  For `fit1`: overlay two curves,  but put the threshold over the probability function as the x-axis and positive prediction values and the negative prediction values as the y-axis.  Overlay the same plot for `fit2`. Which model would you choose if the set of positive and negative prediction values are the concerns? If you can find an R package to do so, you may use it directly.
+
+```{r}
+
+
+
+
+```
+
   
 ### Cost function/ Bayes Rule
 
@@ -337,9 +418,36 @@ Bayes rules with risk ratio $\frac{a_{10}}{a_{01}}=10$ or $\frac{a_{10}}{a_{01}}
 
 i.  Write down the linear boundary for the Bayes classifier if the risk ratio of $a_{10}/a_{01}=10$.
 
+```{r}
+
+fit.final
+
+```
+
+
+
 ii. What is your estimated weighted misclassification error for this given risk ratio?
 
+The estiamted weighted miscalssification error for this given risk ratio is .714. 
+
+```{r}
+
+risk.ratio <- (.1/(1+.1))
+
+fit.final.pred.bayes <- as.factor(ifelse(fit.final$fitted > risk.ratio, "1", "0"))
+MCE.bayes <- (10*sum(fit.final.pred.bayes[hd_data.f$HD == "1"] != "1")
+              + sum(fit.final.pred.bayes[hd_data.f$HD == "0"] != "0"))/length(hd_data.f$HD)
+MCE.bayes
+
+```
+
 iii.  How would you classify Liz under this classifier?
+
+```{r}
+
+
+
+```
 
 iv. Bayes rule gives us the best rule if we can estimate the probability of `HD-1` accurately. In practice we use logistic regression as our working model. How well does the Bayes rule work in practice? We hope to show in this example it works pretty well.
 
@@ -347,7 +455,52 @@ Now, draw two estimated curves where x = threshold, and y = misclassification er
 
 v. Use weighted misclassification error, and set $a_{10}/a_{01}=10$. How well does the Bayes rule classifier perform? 
 
+
+```{r}
+
+risk.ratio <- (.1/(1+.1))
+
+thresholds <- seq(0, 1, by = .01)
+
+fitted.thresholds <- thresholds %>% map(function(x) as.factor(ifelse(fit2$fitted > x, "1", "0")))
+
+weighted.MCE <- map(fitted.thresholds, function(x) (10*sum(x[hd_data.f$HD == "1"] != "1")
+              + sum(x[hd_data.f$HD == "0"] != "0"))/length(hd_data.f$HD))
+
+weighted.MCE <- unlist(weighted.MCE)
+
+MCE.by.threshold <- data.frame(cbind(thresholds, weighted.MCE))
+
+
+ggplot(MCE.by.threshold, aes(thresholds, weighted.MCE)) +
+  geom_line() + geom_vline(xintercept = risk.ratio, slope = 0)
+
+```
+
 vi. Use weighted misclassification error, and set $a_{10}/a_{01}=1$. How well does the Bayes rule classifier perform? 
+
+```{r}
+
+risk.ratio <- (1/(1+1))
+
+thresholds <- seq(0, 1, by = .01)
+
+fitted.thresholds <- thresholds %>% map(function(x) as.factor(ifelse(fit2$fitted > x, "1", "0")))
+
+weighted.MCE <- map(fitted.thresholds, function(x) (1*sum(x[hd_data.f$HD == "1"] != "1")
+              + sum(x[hd_data.f$HD == "0"] != "0"))/length(hd_data.f$HD))
+
+weighted.MCE <- unlist(weighted.MCE)
+
+MCE.by.threshold <- data.frame(cbind(thresholds, weighted.MCE))
+
+
+ggplot(MCE.by.threshold, aes(thresholds, weighted.MCE)) +
+  geom_line() + geom_vline(xintercept = risk.ratio, slope = 0)
+
+```
+
+
 
 # Part II: Project
 
