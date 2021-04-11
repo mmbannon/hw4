@@ -154,7 +154,7 @@ L(B0,B1|Data) = P(HD=1|SBP=152) * P(HD=0|SBP=110) * P(HD=0|SBP=154) * P(HD=1|SBP
 
 iii. Find the MLE based on this subset using glm(). Report the estimated logit function of `SBP` and the probability of `HD`=1. Briefly explain how the MLE are obtained based on ii. above.
 
-The logit function estimated by using glm() is = -2.55 + 0.01*SBP. [NEED TO FINISH ANSWERING]
+The logit function estimated by using glm() is = -2.55 + 0.01*SBP. The parameter values of the glm function are estimated such that they maximize the likelihood that the function described by the model produced the data that were actually observed. The process involves iteratively weighting the independent variables such that they minimize the least squares estimate. 
 
 ```{r, results=T}
 
@@ -218,7 +218,7 @@ summary(fit2)
 
 ii. Is the residual deviance of `fit2` always smaller than that of `fit1`? Why or why not?
 
-[NEED TO COMPLETE]
+No, residual deviance is not always smaller. It is possible that adding too many predictors may result in a less useful model. 
   
 iii. Perform both the Wald test and the Likelihood ratio tests (Chi-Squared) to see if the added variable is significant at the .01 level.  What are the p-values from each test? Are they the same? 
 
@@ -302,7 +302,16 @@ summary(fit.final)
 
 iii. Use the model chosen from part ii. as the final model. Write a brief summary to describe important factors relating to Heart Diseases (i.e. the relationships between those variables in the model and heart disease). Give a definition of “important factors”. 
 
-[NEED TO COMPLETE]
+In the final model, while six predictors have been selected as being important for predicting Heart Disease, only five of the six are statistically significant. FRW is not statisically significant but is important to include in terms of estimating the impact of the other variables and the overall predictive accuracy of the model. 
+
+The relationship of the statistically significant variables with respect to our dependent variable HD is as follows:
+  _AGE: for every 1 year increase in age, there is on average a .06 increase in likelihood of having HD 
+  _SEX: for SEX=1 (Males), there is on average a .91 increase in the likelihood of having HD
+  _SBP: for every 1 point increase in SBP, there is on average a .016 increase in the likelihood of having HD
+  _CHOL: for every 1 point increase in CHOL, there is on average a .004 increase in the likelihood of having HD
+  _CIG: for CIG=1 (is a smoker), there is on average a .012 increase in the likelihood of having HD
+  
+Definition of important factors: variables that increase the overall predictive accuracy of the model, but are not necessarily statistically significant 
 
 iv. What is the probability that Liz will have heart disease, according to our final model?
 
@@ -441,7 +450,7 @@ MCE.bayes
 
 ```
 
-iii.  How would you classify Liz under this classifier?
+iii.  How would you classify Liz under this classifier? @chris @charles
 
 ```{r}
 
@@ -454,7 +463,6 @@ iv. Bayes rule gives us the best rule if we can estimate the probability of `HD-
 Now, draw two estimated curves where x = threshold, and y = misclassification errors, corresponding to the thresholding rule given in x-axis.
 
 v. Use weighted misclassification error, and set $a_{10}/a_{01}=10$. How well does the Bayes rule classifier perform? 
-
 
 ```{r}
 
