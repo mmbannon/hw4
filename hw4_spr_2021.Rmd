@@ -149,12 +149,12 @@ print(hd_data.f_sample)
 
 ii. Write down the likelihood function using the five observations above.
 
-L(B0,B1|Data) = P(HD=1|SBP=152) * P(HD=0|SBP=110) * P(HD=0|SBP=154) * P(HD=1|SBP=160) * P(HD=0|SBP=182)
-              = (exp(B0+152 * B1)/exp(B0+152 * B1)) * ... * 1/exp(B0+182 * B1))
+>L(B0,B1|Data) = P(HD=1|SBP=152) * P(HD=0|SBP=110) * P(HD=0|SBP=154) * P(HD=1|SBP=160) * P(HD=0|SBP=182)
+               = (exp(B0+152 * B1)/exp(B0+152 * B1)) * ... * 1/exp(B0+182 * B1))
 
 iii. Find the MLE based on this subset using glm(). Report the estimated logit function of `SBP` and the probability of `HD`=1. Briefly explain how the MLE are obtained based on ii. above.
 
-The logit function estimated by using glm() is = -2.55 + 0.01*SBP. The parameter values of the glm function are estimated such that they maximize the likelihood that the function described by the model produced the data that were actually observed. The process involves iteratively weighting the independent variables such that they minimize the least squares estimate. 
+>The logit function estimated by using glm() is = -2.55 + 0.01*SBP. The parameter values of the glm function are estimated such that they maximize the likelihood that the function described by the model produced the data that were actually observed. The process involves iteratively weighting the independent variables such that they minimize the least squares estimate. 
 
 ```{r, results=T}
 
@@ -165,7 +165,7 @@ summary(fit0, results=TRUE)
 
 iv. Evaluate the probability of Liz having heart disease. 
 
-The probability of Liz having heart disease according to this particular model is 24.2%. 
+>The probability of Liz having heart disease according to this particular model is 24.2%. 
 
 ```{r, results=T}
 
@@ -218,33 +218,26 @@ summary(fit2)
 
 ii. Is the residual deviance of `fit2` always smaller than that of `fit1`? Why or why not?
 
-No, residual deviance is not always smaller. It is possible that adding too many predictors may result in a less useful model. 
+>No, residual deviance is not always smaller. It is possible that adding too many predictors may result in a less useful model. 
   
 iii. Perform both the Wald test and the Likelihood ratio tests (Chi-Squared) to see if the added variable is significant at the .01 level.  What are the p-values from each test? Are they the same? 
 
-Wald Test
 ```{r, results=T}
-
 Anova(fit2)
-
 ```
 
-Chi-squared Test
+
 ```{r, results=T}
-
 anova(fit1, fit2, test="Chisq")
-
 ```
 
-For the Wald test, the p-value of SEX is significant at the .01 level with a p-value of 3.8e-11. For the Chi-squared test, the p-value is significant at the .01 level with a p-value of 2.35e-21. No, they are not the same value. The p-value of the chi-squared test is much smaller than the p-value from the Wald test. 
+>For the Wald test, the p-value of SEX is significant at the .01 level with a p-value of 3.8e-11. For the Chi-squared test, the p-value is significant at the .01 level with a p-value of 2.35e-21. No, they are not the same value. The p-value of the chi-squared test is much smaller than the p-value from the Wald test. 
 
 ###  Model building
 
 Start with all variables. Our goal is to fit a well-fitting model, that is still small and easy to interpret (parsimonious).
 
 i. Use backward selection method. Only keep variables whose coefficients are significantly different from 0 at .05 level. Kick out the variable with the largest p-value first, and then re-fit the model to see if there are other variables you want to kick out.
-
-Backward selection method
 
 ```{r, include=T, results='hide'}
 
@@ -266,7 +259,7 @@ summary(fit3.4)
 
 ```
 
-Model fit3.4 results in a model where all indepdent variables are significant at a .05 level. The AIC for this model is 1359. 
+>Model fit3.4 results in a model where all indepdent variables are significant at a .05 level. The AIC for this model is 1359. 
 
 ```{r, results=T}
 
@@ -278,9 +271,7 @@ summary(fit3.4)
 
 ii. Use AIC as the criterion for model selection. Find a model with small AIC through exhaustive search. Does exhaustive search guarantee that the p-values for all the remaining variables are less than .05? Is our final model here the same as the model from backwards elimination? 
 
-Exhaustive search
-
-No, exhaustive search does not guarantee that the p-values for all the remaining variables are less than .05. No, the final model here is not the same as the model from backwards elimination. The final model using Backwards search does not include the indepedent variables: CIG and FRW.
+>No, exhaustive search does not guarantee that the p-values for all the remaining variables are less than .05. No, the final model here is not the same as the model from backwards elimination. The final model using Backwards search does not include the indepedent variables: CIG and FRW.
 
 ```{r, include=T, results='hide'}
 
@@ -302,20 +293,20 @@ summary(fit.final)
 
 iii. Use the model chosen from part ii. as the final model. Write a brief summary to describe important factors relating to Heart Diseases (i.e. the relationships between those variables in the model and heart disease). Give a definition of “important factors”. 
 
-In the final model, while six predictors have been selected as being important for predicting Heart Disease, only five of the six are statistically significant. FRW is not statisically significant but is important to include in terms of estimating the impact of the other variables and the overall predictive accuracy of the model. 
+>In the final model, while six predictors have been selected as being important for predicting Heart Disease, only five of the six are statistically significant. FRW is not statisically significant but is important to include in terms of estimating the impact of the other variables and the overall predictive accuracy of the model. 
 
-The relationship of the statistically significant variables with respect to our dependent variable HD is as follows:
-  _AGE: for every 1 year increase in age, there is on average a .06 increase in likelihood of having HD 
-  _SEX: for SEX=1 (Males), there is on average a .91 increase in the likelihood of having HD
-  _SBP: for every 1 point increase in SBP, there is on average a .016 increase in the likelihood of having HD
-  _CHOL: for every 1 point increase in CHOL, there is on average a .004 increase in the likelihood of having HD
-  _CIG: for CIG=1 (is a smoker), there is on average a .012 increase in the likelihood of having HD
+>The relationship of the statistically significant variables with respect to our dependent variable HD is as follows:
+  + AGE: for every 1 year increase in age, there is on average a .06 increase in likelihood of having HD 
+  + SEX: for SEX=1 (Males), there is on average a .91 increase in the likelihood of having HD
+  + SBP: for every 1 point increase in SBP, there is on average a .016 increase in the likelihood of having HD
+  + CHOL: for every 1 point increase in CHOL, there is on average a .004 increase in the likelihood of having HD
+  + CIG: for CIG=1 (is a smoker), there is on average a .012 increase in the likelihood of having HD
   
-Definition of important factors: variables that increase the overall predictive accuracy of the model, but are not necessarily statistically significant 
+>Definition of important factors: variables that increase the overall predictive accuracy of the model, but are not necessarily statistically significant 
 
 iv. What is the probability that Liz will have heart disease, according to our final model?
 
-The probability of Liz having heart disease according to this particular model is 3.5%. 
+>The probability of Liz having heart disease according to this particular model is 3.5%. 
 
 ```{r, results=T}
 
@@ -331,7 +322,7 @@ fit.final.pred
 
 i. Display the ROC curve using `fit1`. Explain what ROC reports and how to use the graph. Specify the classifier such that the False Positive rate is less than .1 and the True Positive rate is as high as possible.
 
-ROC reports the tradeoff between sensitivity and specifity of a given classifier -- i.e., it is an evaluation metric for assessing the performance of a classification model. The classifer in this case has a FPR of 9.76% and a TPR of 21.5% with a threshold of 29.8%. 
+>ROC reports the tradeoff between sensitivity and specifity of a given classifier -- i.e., it is an evaluation metric for assessing the performance of a classification model. The classifer in this case has a FPR of 9.76% and a TPR of 21.5% with a threshold of 29.8%. 
 
 ```{r}
 
@@ -367,7 +358,7 @@ roc.df.fit1 %>%
 
 ii. Overlay two ROC curves: one from `fit1`, the other from `fit2`. Does one curve always contain the other curve? Is the AUC of one curve always larger than the AUC of the other one? Why or why not?
 
-@chris @charles please check this: On an AUC basis, fit2 has a larger AUC than fit2. However, at certain thresholds, the ROC curve for fit2 appears to be below fit1. No, one curve does not always contain the other curve, and the ACU of one curve is not always larger than the AUC of the other one. This is because adding additional variables does not necessarily increase predictive power, particularly at specific thresholds. 
+>On an AUC basis, fit2 has a larger AUC than fit2. However, at certain thresholds, it appears that the ROC curve for fit2 appears to be below/at the same level as fit1. This suggests that at those thresholds the models are negligibly more "useful"than the other. No, one curve does not always contain the other curve, and the ACU of one curve is not always larger than the AUC of the other one. This is because adding additional variables does not necessarily increase predictive power, particularly at specific thresholds. 
 
 ```{r}
 fit2.roc <- roc(hd_data.f$HD, fit2$fitted)
@@ -384,16 +375,16 @@ legend("bottomright",
        lty=1)
 ```
 
-iii.  Estimate the Positive Prediction Values and Negative Prediction Values for `fit1` and `fit2` using .5 as a threshold. Which model is more desirable if we prioritize the Positive Prediction values? @chris @charles 
+iii.  Estimate the Positive Prediction Values and Negative Prediction Values for `fit1` and `fit2` using .5 as a threshold. Which model is more desirable if we prioritize the Positive Prediction values? 
 
-fit2 is more desireable if we prioritze the Positive Prediction values. fit2 has a Positive Prediction value of .5 whereas fit1 has a Positive Prediction value of .45
+>fit2 is more desireable if we prioritze the Positive Prediction values. fit2 has a Positive Prediction value of .5 whereas fit1 has a Positive Prediction value of .45.
 
 
 ```{r}
 
 fit1.pred.5 <- ifelse(fit1$fitted > .5, "1", "0")
 
-confusionMatrix(data = as.factor(fit1.pred.5),        
+cf.1 <- confusionMatrix(data = as.factor(fit1.pred.5),        
                        reference = hd_data.f$HD,            
                        positive = levels(hd_data.f$HD)[2])
 
@@ -415,8 +406,6 @@ iv.  For `fit1`: overlay two curves,  but put the threshold over the probability
 ```{r}
 
 
-
-
 ```
 
   
@@ -424,22 +413,15 @@ iv.  For `fit1`: overlay two curves,  but put the threshold over the probability
 
 Bayes rules with risk ratio $\frac{a_{10}}{a_{01}}=10$ or $\frac{a_{10}}{a_{01}}=1$. Use your final model obtained from Part 1 to build a class of linear classifiers.
 
-
 i.  Write down the linear boundary for the Bayes classifier if the risk ratio of $a_{10}/a_{01}=10$.
 
-```{r}
-
-fit.final
-
-```
-
-
+>(-9.227 + .061AGE + .911SEX + .016SBP + .004CHOL + .006FRW + .0122CIG >log(.09/.90))
 
 ii. What is your estimated weighted misclassification error for this given risk ratio?
 
-The estiamted weighted miscalssification error for this given risk ratio is .714. 
+>The estiamted weighted miscalssification error for this given risk ratio is .714. 
 
-```{r}
+```{r, results=T}
 
 risk.ratio <- (.1/(1+.1))
 
@@ -450,19 +432,17 @@ MCE.bayes
 
 ```
 
-iii.  How would you classify Liz under this classifier? @chris @charles
+iii.  How would you classify Liz under this classifier? 
 
-```{r}
-
-
-
-```
+Under this classificaiton, Liz would be classified as HD=1. 
 
 iv. Bayes rule gives us the best rule if we can estimate the probability of `HD-1` accurately. In practice we use logistic regression as our working model. How well does the Bayes rule work in practice? We hope to show in this example it works pretty well.
 
 Now, draw two estimated curves where x = threshold, and y = misclassification errors, corresponding to the thresholding rule given in x-axis.
 
 v. Use weighted misclassification error, and set $a_{10}/a_{01}=10$. How well does the Bayes rule classifier perform? 
+
+>The Bayes rule classifier performs well as a proxy for MCE. In both charts we can see that the Bayes calculaed MCE (as the y-incercept) is roughly at the min of the chart in both instances. 
 
 ```{r}
 
@@ -481,7 +461,9 @@ MCE.by.threshold <- data.frame(cbind(thresholds, weighted.MCE))
 
 
 ggplot(MCE.by.threshold, aes(thresholds, weighted.MCE)) +
-  geom_line() + geom_vline(xintercept = risk.ratio, slope = 0)
+  geom_line() + geom_vline(xintercept = risk.ratio, slope = 0)+
+  geom_line() + geom_hline(yintercept = MCE.bayes, slope=0)
+  
 
 ```
 
@@ -489,7 +471,12 @@ vi. Use weighted misclassification error, and set $a_{10}/a_{01}=1$. How well do
 
 ```{r}
 
-risk.ratio <- (1/(1+1))
+risk.ratio2 <- (1/(1+1))
+
+fit.final.pred.bayes2 <- as.factor(ifelse(fit.final$fitted > risk.ratio2, "1", "0"))
+MCE.bayes2 <- (1*sum(fit.final.pred.bayes2[hd_data.f$HD == "1"] != "1")
+              + sum(fit.final.pred.bayes2[hd_data.f$HD == "0"] != "0"))/length(hd_data.f$HD)
+MCE.bayes2
 
 thresholds <- seq(0, 1, by = .01)
 
@@ -504,10 +491,10 @@ MCE.by.threshold <- data.frame(cbind(thresholds, weighted.MCE))
 
 
 ggplot(MCE.by.threshold, aes(thresholds, weighted.MCE)) +
-  geom_line() + geom_vline(xintercept = risk.ratio, slope = 0)
+  geom_line() + geom_vline(xintercept = risk.ratio2, slope = 0) +
+  geom_line() + geom_hline(yintercept = MCE.bayes2, slope=0)
 
 ```
-
 
 
 # Part II: Project
@@ -515,4 +502,6 @@ ggplot(MCE.by.threshold, aes(thresholds, weighted.MCE)) +
 ## Project Option 1 Credit Risk via LendingClub
 
 ## Project Opetion 2  Diabetes and Health Management
+
+>See attached rmd file
 
